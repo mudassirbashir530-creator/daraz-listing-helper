@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIFEINNO Daraz Helper - Sidebar</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- SheetJS Excel Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="sidebar-layout">
+  <!-- Global Container -->
+  <div id="extension-container">
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="header-logo-container">
+        <span class="logo-text">LIFEINNO</span>
+        <span class="badge">Daraz Side Helper</span>
+      </div>
+    </header>
+
+    <!-- Content Area (Scrollable) -->
+    <main class="content-area">
+      
+      <!-- VIEW 1: UPLOAD -->
+      <section id="view-upload" class="view-section">
+        <div class="welcome-box">
+          <div class="brand-hero">
+            <div class="hero-icon">L</div>
+            <h2>LIFEINNO Seller Assistant</h2>
+            <p>Upload your product database Excel file to start listings without tab switching.</p>
+          </div>
+          
+          <div class="upload-dropzone">
+            <input type="file" id="fileInput" accept=".xlsx, .xls" class="file-input-hidden" />
+            <label for="fileInput" class="upload-label">
+              <svg xmlns="http://www.w3.org/2000/svg" class="upload-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <span class="upload-text">Choose Excel File (.xlsx)</span>
+              <span class="upload-subtext">Drag & drop or click to browse</span>
+            </label>
+          </div>
+
+          <div id="upload-status" class="status-msg info">
+            No file loaded. Please load your product sheet.
+          </div>
+          
+          <!-- Sample helper instructions inside sidebar -->
+          <div class="instruction-brief">
+            <h4>Expected Excel structure:</h4>
+            <ul>
+              <li><strong>Col A:</strong> Product Serial Number (first row of item)</li>
+              <li><strong>Col B:</strong> Professional Title (first row of item)</li>
+              <li><strong>Col E:</strong> Variation Slot Name (all rows)</li>
+              <li><strong>Col G:</strong> Actual Price, <strong>Col H:</strong> Sale Price</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: PRODUCT LIST -->
+      <section id="view-list" class="view-section" style="display: none;">
+        <div class="search-container">
+          <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" id="search-bar" class="search-bar" placeholder="Search title, serial, size, color..." />
+          <button id="btn-clear-search" class="clear-btn" style="display: none;">&times;</button>
+        </div>
+
+        <div class="list-meta">
+          <span id="loaded-count" class="count-indicator">0 products loaded</span>
+          <button id="btn-reload-file" class="text-btn">Change File</button>
+        </div>
+
+        <div id="products-scroll-container" class="products-list">
+          <!-- Dynamic product cards will be injected here -->
+        </div>
+      </section>
+
+      <!-- VIEW 3: PRODUCT DETAIL -->
+      <section id="view-detail" class="view-section" style="display: none;">
+        <!-- Detail Header/Back navigation -->
+        <div class="detail-navigation">
+          <button id="btn-back-to-list" class="back-btn">
+            ← Products List
+          </button>
+          <span id="detail-serial-badge" class="serial-badge">SN: --</span>
+        </div>
+
+        <div class="product-detail-card">
+          
+          <!-- Field: Title -->
+          <div class="field-row">
+            <div class="field-meta">
+              <span class="field-label">Professional Title</span>
+              <span id="val-title" class="field-value">No Title</span>
+            </div>
+            <div class="action-buttons">
+              <button class="copy-btn mini-btn" data-field="title" title="Copy to Clipboard">📋 Copy</button>
+              <button class="fill-btn mini-btn" data-field="title" title="Fill into Active Field">⚡ Fill</button>
+            </div>
+          </div>
+
+          <!-- Dual Field Row (Size & Color) -->
+          <div class="grid-2-col">
+            <div class="field-row border-right">
+              <div class="field-meta">
+                <span class="field-label">Size / Dimensions</span>
+                <span id="val-size" class="field-value">—</span>
+              </div>
+              <div class="action-buttons">
+                <button class="copy-btn mini-btn" data-field="size">📋</button>
+                <button class="fill-btn mini-btn" data-field="size">⚡</button>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-meta">
+                <span class="field-label">Color Options</span>
+                <span id="val-color" class="field-value">—</span>
+              </div>
+              <div class="action-buttons">
+                <button class="copy-btn mini-btn" data-field="color">📋</button>
+                <button class="fill-btn mini-btn" data-field="color">⚡</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Field: Base Unit Price -->
+          <div class="field-row bg-highlight">
+            <div class="field-meta">
+              <span class="field-label">Base Unit Price</span>
+              <span id="val-base-price" class="field-value">—</span>
+            </div>
+            <div class="action-buttons">
+              <button class="copy-btn mini-btn" data-field="basePrice">📋 Copy</button>
+              <button class="fill-btn mini-btn" data-field="basePrice">⚡ Fill</button>
+            </div>
+          </div>
+
+          <!-- Section Break: Variations -->
+          <div class="section-divider">
+            <span>PACK VARIATIONS</span>
+          </div>
+
+          <div id="variations-container" class="variations-list-container">
+            <!-- Dynamic list of pack size variations -->
+          </div>
+
+          <!-- Section Break: Logistics (Auto Dimensions) -->
+          <div class="section-divider">
+            <span>PACKAGE LOGISTICS (AUTO)</span>
+            <span class="info-tooltip" title="Calculated based on Pack of 4 Special Price">ⓘ</span>
+          </div>
+
+          <div class="logistics-box">
+            <!-- Dimensions Row -->
+            <div class="field-row">
+              <div class="field-meta">
+                <span class="field-label">Package Dimensions</span>
+                <span id="val-dimensions" class="field-value">—</span>
+              </div>
+              <div class="action-buttons">
+                <button class="copy-btn mini-btn" data-field="dimensions" title="Copy format L x W x H">📋 Copy</button>
+                <button class="fill-btn mini-btn" data-field="dimensions">⚡ Fill</button>
+              </div>
+            </div>
+
+            <!-- Weight Row -->
+            <div class="field-row">
+              <div class="field-meta">
+                <span class="field-label">Package Weight</span>
+                <span id="val-weight" class="field-value">—</span>
+              </div>
+              <div class="action-buttons">
+                <button class="copy-btn mini-btn" data-field="weight">📋 Copy</button>
+                <button class="fill-btn mini-btn" data-field="weight">⚡ Fill</button>
+              </div>
+            </div>
+
+            <!-- Length, Width, Height individually for Direct Form fill -->
+            <div class="individual-dims-grid">
+              <div class="dim-chip">
+                <label>Len (cm)</label>
+                <div>
+                  <span id="val-dim-l">-</span>
+                  <button class="copy-btn nano-btn" data-field="dim-l">📋</button>
+                  <button class="fill-btn nano-btn" data-field="dim-l">⚡</button>
+                </div>
+              </div>
+              <div class="dim-chip">
+                <label>Wid (cm)</label>
+                <div>
+                  <span id="val-dim-w">-</span>
+                  <button class="copy-btn nano-btn" data-field="dim-w">📋</button>
+                  <button class="fill-btn nano-btn" data-field="dim-w">⚡</button>
+                </div>
+              </div>
+              <div class="dim-chip">
+                <label>Hei (cm)</label>
+                <div>
+                  <span id="val-dim-h">-</span>
+                  <button class="copy-btn nano-btn" data-field="dim-h">📋</button>
+                  <button class="fill-btn nano-btn" data-field="dim-h">⚡</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Break: Warranty & Rules -->
+          <div class="section-divider">
+            <span>POLICIES & SERVICE</span>
+          </div>
+
+          <!-- Field: Warranty -->
+          <div class="field-row">
+            <div class="field-meta">
+              <span class="field-label">Warranty Type</span>
+              <span id="val-warranty" class="field-value">Seller Warranty — 1 Month</span>
+            </div>
+            <div class="action-buttons">
+              <button class="copy-btn mini-btn" data-field="warranty">📋 Copy</button>
+              <button class="fill-btn mini-btn" data-field="warranty">⚡ Fill</button>
+            </div>
+          </div>
+
+          <!-- Field: Return Policy -->
+          <div class="field-row vertical">
+            <div class="field-header">
+              <span class="field-label">LIFEINNO Return Policy</span>
+              <div class="action-buttons text-right">
+                <button class="copy-btn mini-btn" data-field="returnPolicy">📋 Copy Text</button>
+                <button class="fill-btn mini-btn" data-field="returnPolicy">⚡ Fill</button>
+              </div>
+            </div>
+            <p id="val-return-policy" class="policy-blockquote">
+              LIFEINNO Return Policy
+• Product must be unused and in original condition
+• Damaged or burnt items are not accepted
+• Original packaging required
+• Parcel opening video required
+Contact us: 03357714860 or IM Chat.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer Toast Notification system -->
+    <div id="toast-notification" class="toast-hidden">Copied to clipboard!</div>
+  </div>
+
+  <script src="sidebar.js"></script>
+</body>
+</html>

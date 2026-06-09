@@ -1,0 +1,6 @@
+{
+  "name": "LIFEINNO Daraz Helper",
+  "description": "Interactive workspace, simulator, and code exporter for the LIFEINNO Daraz Helper Chrome Extension.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
